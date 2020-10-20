@@ -147,21 +147,28 @@ int main(int argc, char *argv[])
 
     for(m=0; m< Nf; m++)
      {
-         
-         
-        for(j=-Nt/2; j< Nt/2; j++)
-        {
-            i = j+Nt/2;
-            
+         for(i=0; i< Nt; i++)
+         {
             REAL(DX,i) = 0.0;
             IMAG(DX,i) = 0.0;
-            
+         }
+         
+        for(j=-Nt/2+1; j< Nt/2; j++)
+        {
             jj = j + m*Nt/2;
             
             if(jj > 0 && jj < ND/2)
             {
-                REAL(DX,i) = data[jj]*phif[abs(j)];
-                IMAG(DX,i) = data[ND-jj]*phif[abs(j)];
+                if(j >= 0)
+                {
+                REAL(DX,j) = data[jj]*phif[abs(j)];
+                IMAG(DX,j) = data[ND-jj]*phif[abs(j)];
+                }
+                else
+                {
+                 REAL(DX,Nt+j) = data[jj]*phif[abs(j)];
+                 IMAG(DX,Nt+j) = data[ND-jj]*phif[abs(j)];
+                }
             }
         }
          
@@ -170,33 +177,18 @@ int main(int argc, char *argv[])
         
          for(n=0; n < Nt; n++)
          {
+             x = -1.0;
+             if(m%2==0 || n%2==0) x = 1.0;
              
-             if(m%2 == 0)
-             {
-                 
+          
                  if((n+m)%2 ==0)
                  {
-                      wave[n][m] = REAL(DX,n);
+                      wave[n][m] = x*REAL(DX,n);
                  }
                  else
                  {
-                    wave[n][m] = IMAG(DX,n);
+                    wave[n][m] = -x*IMAG(DX,n);
                  }
-                 
-             }
-             else
-             {
-                 if((n+m)%2 ==0)
-                 {
-                      wave[n][m] = REAL(DX,n);
-                 }
-                 else
-                 {
-                    wave[n][m] = -IMAG(DX,n);
-                 }
-                 
-             }
-             
             
          }
          
@@ -240,7 +232,7 @@ int main(int argc, char *argv[])
     xx /= (double)(Nf*Nt);
     yy /= (double)(Nf*Nt);
     
-    printf("mean = %e sigma = %e\n", xx, sqrt(yy-xx*xx));
+    printf("mean = %e sigma = %e sq = %e\n", xx, sqrt(yy-xx*xx), yy);
     
     printf("max %e %d %d\n", y, n, m);
     
